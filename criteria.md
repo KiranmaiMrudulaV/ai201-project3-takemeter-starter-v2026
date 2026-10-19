@@ -51,63 +51,43 @@ whether you hit them:
 
 ---
 
-## 1.
+## 1. Overall accuracy on the held-out test split is at least 0.60.
 
-<!-- Your criterion. It must name a number. -->
+**How to check:** read `accuracy` in `results.json` for each of the three seeds. All three must be 0.60 or higher.
 
-
-
-**Why this target:**
-
-
+**Why this target:** 0.60 is realistic for a model trained on only 150–200 labeled comments.
 
 ---
 
-## 2.
+## 2. Every label has an F1 of at least 0.50 on the held-out test split.
 
-<!-- Your criterion. -->
+**How to check:** read each label's `f1` under `per_label` in `results.json` for each of the three seeds. `analysis`, `hot_take` and `experience` must all be 0.50 or higher.
 
-
-
-**Why this target:**
-
-
+**Why this target:** Every label should do somewhat better than guessing, but I'm not holding the blurry pair (`analysis` vs `hot_take`) to a hard standard. 0.50 is a sweet spot between the weak labels and the blurry pair.
 
 ---
 
-## 3.
+## 3. No label is more than 60% of the rows in labels.csv.
 
-<!-- Your criterion. -->
+**How to check:** count the rows for each label in `labels.csv` and divide by the total. The largest share must be 60% or lower.
 
-
-
-**Why this target:**
-
-
+**Why this target:** From reading Reddit, most comments are hot takes with no evidence or personal experiences, so I expect the data to skew toward those. 60% allows for that skew without letting any one label dominate.
 
 ---
 
-## 4.
+## 4. My labels match the staff labels on at least 70% of the same posts.
 
-<!-- Your criterion. -->
+**How to check:** in next unit's agreement report, compare my label with the staff label for each shared post. The percent that match must be 70% or higher.
 
-
-
-**Why this target:**
-
-
+**Why this target:** Most posts should get the same label from me and from staff, but the hard boundary (`analysis` vs `hot_take`) can still split, so I'm not asking for near-perfect agreement.
 
 ---
 
-## 5.
+## 5. On the held-out test split, accuracy on the model's most-confident third of predictions is at least 0.75.
 
-<!-- Your criterion. -->
+**How to check:** read `accuracy_most_confident_third` under `confidence` in `results.json` for each of the three seeds. All three must be 0.75 or higher.
 
-
-
-**Why this target:**
-
-
+**Why this target:** I expect the model to be right most of the time when it is confident. With about 25 test posts, a third is about 8 predictions, so 0.75 allows at most 2 wrong.
 
 ---
 
