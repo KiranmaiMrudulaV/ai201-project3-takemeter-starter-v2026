@@ -39,140 +39,154 @@
 
 ## What This Does
 
-<!-- Your community, and what your classifier sorts posts into. Three or four
-     sentences. -->
-
-
+TakeMeter sorts public Reddit comments about healthy eating, nutrition, protein and sugar into three kinds, based on how the writer supports what they say: `analysis` (a claim with a named, findable source), `hot_take` (a confident claim with nothing checkable behind it) and `experience` (what happened to the writer personally). I fine-tuned a small model (`distilbert-base-uncased`) on 189 comments I collected and labelled, so it can tell a sourced argument from an unsupported opinion from a personal story. The community is "people who talk about healthy eating on Reddit", and the labels came from what I saw in the comments I read, not from a textbook.
 
 ---
 
 ## Label Taxonomy
 
-<!-- Each label: a one-sentence definition and two real examples from your
-     reading. Then your decision rule for the hardest boundary.
+### `analysis`
 
-     The decision rule is worth a point on its own and it's the thing most
-     people leave out. Every taxonomy has a hardest boundary. Name yours. -->
-
-### `label_one`
-
-**Definition:**
+**Definition:** Makes a claim backed by a named, findable source, such as a link, or a named study, paper, book or statistic.
 
 **Example 1:**
+> Cutting out sugar will make you stop liking sweets.
 >
+> https://www.sciencedaily.com/releases/2026/03/260318033107.htm
 
 **Example 2:**
+> organic doesn't mean healthy.
 >
+> "all natural" doesn't mean anything
+>
+> there are like 60+ names for sugar :P
+>
+> https://www.healthline.com/nutrition/56-different-names-for-sugar
 
-### `label_two`
+### `hot_take`
 
-**Definition:**
+**Definition:** A confident claim about food or health with no named, findable source behind it.
 
 **Example 1:**
->
+> Fruit is not equal to candy.
 
 **Example 2:**
+> Saturated fat doesn’t cause heart disease.
+
+### `experience`
+
+**Definition:** Describes what happened to the writer personally, such as their results, symptoms or routine, without claiming it applies to everyone.
+
+**Example 1:**
+> I lived off of potatoes almost exclusively for about 6 months. They were a dollar for 10 pounds, it was all I could afford. This was in Oregon about a decade ago.
+
+**Example 2:**
+> The only negative effect I've ever experienced is excessive urination, especially waking up at night to pee.
 >
+> This happens for me when I exceed about 1.5xbw in protein.
 
 ### The hardest boundary
 
-**Which two labels:**
+**Which two labels:** `analysis` and `hot_take`. (A second, smaller boundary is `experience` vs `analysis` when a comment includes a number.)
 
 **The decision rule I used every time:**
-<!-- e.g. "If the post names a specific checkable fact, it's `analysis`, even
-     if the tone is heated." -->
 
+A comment is `analysis` only if it points to evidence someone else could look up: a link, or a named study, paper, book or statistic. Everything below that line is `hot_take`, even when it sounds expert or contains numbers:
 
+- A number or percentage with no source named is `hot_take`.
+- "Studies show…" or "they've found…" with no study named is `hot_take`.
+- A credential or relationship ("I'm a dietitian", "my cousin is an RD", "source: my wife is an RD") is not evidence, so it is `hot_take`.
+
+If a number or measurement describes the writer's own body or results (their bloodwork, weight, symptoms), it is `experience`, not `analysis`.
+
+I wrote this rule in two steps. My first version said a comment needed "a checkable fact". After labelling my first 20 comments cold, I decided that a named source was the only thing I could apply the same way every time, and I tightened the rule. That changed two of my cold labels (see the hard cases below).
 
 ---
 
 ## The Dataset
 
-<!-- Where you collected from, how you labelled, your counts, and three hard
-     cases. -->
+**Where the posts came from:** Public Reddit comment threads about nutrition and healthy eating, 12 threads in all: several in r/nutrition (including threads on nutrition myths, "what do you wish everyone knew", "hottest nutrition takes", "underrated tips", and the Harvard sugar-sweetened-drinks study and protein side-effects threads), plus r/ScientificNutrition, r/science (an ultra-processed-food study), r/AskReddit (two threads), r/AskWomenOver40 (dietitians) and r/todayilearned (a potato-and-buttermilk diet). Most of the original posts were questions, so I collected the replies instead. I copied whole comments by hand from the thread pages and removed usernames and vote counts. I skipped jokes, plain questions, one-word replies, deleted comments, ads and off-topic tangents, because none of my three labels covers them. Everything is public, with no login needed.
 
-**Where the posts came from:**
-
-**How I labelled them:** <!-- Cold first? Pre-labelled with AI and corrected?
-Say so plainly — the disclosure is required, not penalised. -->
+**How I labelled them:** I labelled the first 20 comments cold, with no tools or help, and marked them `cold` in the note column. My original cold labels are saved in `cold_batch.csv`. The other 169 comments were pre-labelled by an AI tool (Claude Code) using my definitions and my rule, and marked `pre-labelled` in the note column. I then read every pre-labelled comment and marked it `pre-labelled, checked`, or `pre-labelled, corrected` if I changed the label. See "How I Used AI" for the disclosure.
 
 **Counts per label:**
 
 | Label | Count | Share |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-| **Total** |  | 100% |
+| hot_take | 89 | 47.1% |
+| experience | 63 | 33.3% |
+| analysis | 37 | 19.6% |
+| **Total** | 189 | 100% |
+
+I stopped at 189 rows, which is under the 200 target and above the 150 floor, because I had run out of time to collect and review more. `analysis` is my thinnest label, and no label is above 60% of the file.
 
 **Three hard cases**
 
-<!-- Any post that made you pause: what it was, which two labels it could have
-     been, and what you chose. These are worth more than the easy 190. -->
-
 **1.**
-> *The post:*
+> *The post:* "This is called the “healthy user bias” and is relevant in almost all epidemiological studies. You have to see what they controlled for to deem it relevant, but with these studies you really can only show correlations."
 >
-> *Could have been:*
+> *Could have been:* `analysis` or `hot_take`.
 >
-> *I chose, because:*
+> *I chose `hot_take`, because:* on my first, cold pass I labelled it `analysis`, since it names a real concept. Later I tightened my rule so that `analysis` needs a named, findable source, and this comment names a concept but no source. I changed it, and changed my other cold `analysis` comment that had no source (the "premature mortality increases BY 31%" comment) for the same reason.
 
 **2.**
-> *The post:*
+> *The post:* "Also, in regards to the context, they've found that people absorb more nutrients from their food if it's like...a comfort food? So if you were raised eating lasagne and you LOVE lasagne, you should try making that more healthy... (if I'm understanding it correctly)..."
 >
-> *Could have been:*
+> *Could have been:* `analysis` or `hot_take`.
 >
-> *I chose, because:*
+> *I chose `hot_take`, because:* it claims "they've found" research but names no study. The same user later admitted she couldn't find the source. An unnamed study is not evidence under my rule.
 
 **3.**
-> *The post:*
+> *The post:* A comment that pastes an AI answer ("ChatGPT - Please comment on the supplement industry funding of research…") followed by a "Sources:" list of three papers with links.
 >
-> *Could have been:*
+> *Could have been:* `analysis` or `hot_take`.
 >
-> *I chose, because:*
+> *I chose `analysis`, because:* it names three papers with links, which meets my rule on its face. I'm unsure about it, because AI-generated citations can be wrong and I did not check them, so "named" and "real" are not the same thing. It is the case that makes me least sure my rule is complete.
 
 ---
 
 ## The Training Run
 
-<!-- Your starting model, your settings, and anything you changed and why. -->
+**Base model:** `distilbert-base-uncased` (the notebook's default).
 
-**Base model:**
+**Settings:** 3 epochs, learning rate 2e-5, batch size 16, 128 tokens per post, seed 42. Trained on CPU (torch 2.14.1, Python 3.12.3). The metrics are saved in `results.json`, and the held-out test posts in `test_split.csv`.
 
-**Settings:** <!-- epochs, learning rate, batch size, seed -->
+**Anything I changed from the defaults, and why:** Nothing. I used the notebook defaults for every setting.
 
-**Anything I changed from the defaults, and why:**
-
-**Split sizes:** <!-- train / val / test, and per-label counts in the test
-split. If a label had fewer than about 8 in test, say so — it explains a lot
-of next unit's variance. -->
-
-
+**Split sizes:** 131 train, 29 validation, 29 test. Test split by label: `analysis` 6, `hot_take` 13, `experience` 10. `analysis` has fewer than 8 test examples, so its score will move a lot between seeds.
 
 ---
 
 ## How I Used AI
 
-<!-- Two specific moments — what you asked, what came back, what you changed.
-
-     ⚠️ Plus disclosure of any pre-labelling. If you had a model pre-label a
-     batch and then read and corrected every one, say that. It's an allowed
-     workflow and disclosing it costs you nothing. Not disclosing it is the
-     problem. -->
+I used Claude Code (an AI coding assistant) throughout this project.
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* After reading threads, I had three or four distinctions I could point at in the text (personal experience posts, replies sharing results, and replies that cited numbers or studies). I asked the AI to help me turn them into labels.
+- *What came back:* Draft definitions for three labels, `analysis`, `hot_take` and `experience`, plus a suggested rule for the hard boundary (a number about the writer's own body is `experience`).
+- *What I changed:* I chose the three labels and kept the "own body" rule, but I made the main rule stricter myself. I decided that `analysis` needs a named source, and that numbers, unnamed studies and credentials are all `hot_take`.
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I asked the AI to pre-label batches of comments using my definitions.
+- *What came back:* It labelled comments such as "an egg has 1.5g of saturated fat, limit 10g/day" and "66–80% of people…" as `analysis` because they contain numbers, and flagged them as uncertain.
+- *What I changed:* I told it that without evidence, a comment with numbers is still a `hot_take`, and that an unnamed study is a `hot_take`. It changed those rows and found others that broke the same rule, including two of my own cold labels, and I confirmed each change.
 
 **Pre-labelling disclosure:**
+
+I labelled 20 comments cold with no help. The other 169 comments were pre-labelled by Claude Code and marked `pre-labelled` in the note column. I read every one of those 169 and marked each `pre-labelled, checked` or `pre-labelled, corrected`. I changed 11 of the 169 pre-labels, all from `analysis` to `hot_take`, and all because of my named-source rule. I also used the AI to clean pasted thread text (removing usernames, vote counts and deleted comments), to set up the environment and notebook, and to suggest the target for criterion 5 in `criteria.md` (accuracy of at least 0.75 on the model's most-confident third). The other four targets and all the reasons in `criteria.md` are mine. This README was drafted with the AI from the facts of the project, and I edited it.
+
+---
+
+## Stretch Features
+
+I declared these two stretch features before building them. I am not doing the fourth-label stretch.
+
+1. **A second training run with one hyperparameter changed.** I will rerun the same 189 comments with the same seed (42) and everything else unchanged, but with `EPOCHS = 5` instead of 3. The metrics will be saved in `results_run2_epochs5.json`, and I will write down which numbers moved against the first run, and by how much.
+2. **50 extra examples for my thinnest label, `analysis`.** `analysis` has 37 rows and only 6 test posts, and it scored F1 0.000 in my first run. I will collect at least 50 more comments that name a source, from new public Reddit threads, label and review them the same way as the rest, and retrain with the default settings. I will write down where they came from and what happened to `analysis` F1.
+
+*(Both will be filled in below once they are built.)*
 
 <!-- ═══════════════════════ UNIT 6 — THE TEST ═══════════════════════
 
