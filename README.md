@@ -186,7 +186,25 @@ I declared these two stretch features before building them. I am not doing the f
 1. **A second training run with one hyperparameter changed.** I will rerun the same 189 comments with the same seed (42) and everything else unchanged, but with `EPOCHS = 5` instead of 3. The metrics will be saved in `results_run2_epochs5.json`, and I will write down which numbers moved against the first run, and by how much.
 2. **50 extra examples for my thinnest label, `analysis`.** `analysis` has 37 rows and only 6 test posts, and it scored F1 0.000 in my first run. I will collect at least 50 more comments that name a source, from new public Reddit threads, label and review them the same way as the rest, and retrain with the default settings. I will write down where they came from and what happened to `analysis` F1.
 
-*(Both will be filled in below once they are built.)*
+### Stretch 1 result: second run, `EPOCHS = 5`
+
+The only change was `EPOCHS = 3` → `EPOCHS = 5`. Same 189 comments, same seed (42), same split (the test posts are identical), same CPU. First run: `results.json`. Second run: `results_run2_epochs5.json`.
+
+| Measure | Run 1 (3 epochs) | Run 2 (5 epochs) | Change |
+|---|---|---|---|
+| Accuracy | 0.621 (18 of 29) | 0.724 (21 of 29) | +0.103 |
+| Macro F1 | 0.468 | 0.675 | +0.207 |
+| F1, `analysis` (6 test posts) | 0.000 | 0.500 | +0.500 |
+| F1, `hot_take` (13 test posts) | 0.621 | 0.692 | +0.071 |
+| F1, `experience` (10 test posts) | 0.783 | 0.833 | +0.050 |
+| Accuracy, most-confident third | 0.889 | 1.000 | +0.111 |
+| Accuracy, least-confident third | 0.222 | 0.556 | +0.333 |
+
+What moved: with 3 epochs the model never predicted `analysis` (all 6 test `analysis` posts were called `hot_take`). With 5 epochs it got 2 of the 6 right, which is where almost all of the gain came from. `experience` went from 9 to 10 of 10 correct, and `hot_take` stayed at 9 of 13, with 4 still called `experience`. The model is now more confident when it is right.
+
+How much I trust this: it is one seed and 29 test posts, so each post is worth about 3.4 points of accuracy. Three more posts correct is the whole difference in accuracy, and two of them are `analysis` posts. I can't tell yet from one run whether 5 epochs is better or whether this seed got lucky. Next unit's three seeds are what will show that.
+
+*(Stretch 2 is filled in below once it is built.)*
 
 <!-- ═══════════════════════ UNIT 6 — THE TEST ═══════════════════════
 
