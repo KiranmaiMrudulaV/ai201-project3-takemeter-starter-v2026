@@ -39,7 +39,7 @@
 
 ## What This Does
 
-TakeMeter sorts public Reddit comments about healthy eating, nutrition, protein and sugar into three kinds, based on how the writer supports what they say: `analysis` (a claim with a named, findable source), `hot_take` (a confident claim with nothing checkable behind it) and `experience` (what happened to the writer personally). I fine-tuned a small model (`distilbert-base-uncased`) on 189 comments I collected and labelled, so it can tell a sourced argument from an unsupported opinion from a personal story. The community is "people who talk about healthy eating on Reddit", and the labels came from what I saw in the comments I read, not from a textbook.
+TakeMeter sorts public Reddit comments about healthy eating, nutrition, protein and sugar into three kinds, based on how the writer supports what they say: `analysis` (a claim with a named, findable source), `hot_take` (a confident claim with nothing checkable behind it) and `experience` (what happened to the writer personally). I fine-tuned a small model (`distilbert-base-uncased`) on 189 comments I collected and labelled (248 after my stretch feature), so it can tell a sourced argument from an unsupported opinion from a personal story. The community is "people who talk about healthy eating on Reddit", and the labels came from what I saw in the comments I read, not from a textbook.
 
 ---
 
@@ -99,17 +99,21 @@ A comment is `analysis` only if it points to evidence someone else could look up
 
 If a number or measurement describes the writer's own body or results (their bloodwork, weight, symptoms), it is `experience`, not `analysis`.
 
+A link or named source counts as `analysis` unless the thread itself showed that source does not support the claim. A claim that only pairs with that disputed paper, with nothing said about what the paper found, stays `hot_take`. For example, "Keto literally causes diabetes" with a link to a Nature paper is `hot_take`, because another commenter pointed out the paper doesn't say that, while a comment that quotes what that paper found is `analysis`.
+
 I wrote this rule in two steps. My first version said a comment needed "a checkable fact". After labelling my first 20 comments cold, I decided that a named source was the only thing I could apply the same way every time, and I tightened the rule. That changed two of my cold labels (see the hard cases below).
 
 ---
 
 ## The Dataset
 
-**Where the posts came from:** Public Reddit comment threads about nutrition and healthy eating, 12 threads in all: several in r/nutrition (including threads on nutrition myths, "what do you wish everyone knew", "hottest nutrition takes", "underrated tips", and the Harvard sugar-sweetened-drinks study and protein side-effects threads), plus r/ScientificNutrition, r/science (an ultra-processed-food study), r/AskReddit (two threads), r/AskWomenOver40 (dietitians) and r/todayilearned (a potato-and-buttermilk diet). Most of the original posts were questions, so I collected the replies instead. I copied whole comments by hand from the thread pages and removed usernames and vote counts. I skipped jokes, plain questions, one-word replies, deleted comments, ads and off-topic tangents, because none of my three labels covers them. Everything is public, with no login needed.
+**Where the posts came from:** Public Reddit comment threads about nutrition and healthy eating. My first 189 comments came from 12 threads: several in r/nutrition (including threads on nutrition myths, "what do you wish everyone knew", "hottest nutrition takes", "underrated tips", and the Harvard sugar-sweetened-drinks study and protein side-effects threads), plus r/ScientificNutrition, r/science (an ultra-processed-food study), r/AskReddit (two threads), r/AskWomenOver40 (dietitians) and r/todayilearned (a potato-and-buttermilk diet). Most of the original posts were questions, so I collected the replies instead. I copied whole comments by hand from the thread pages and removed usernames and vote counts. I skipped jokes, plain questions, one-word replies, deleted comments, ads and off-topic tangents, because none of my three labels covers them. Everything is public, with no login needed. The extra 59 comments for my stretch feature came from 10 more r/nutrition threads, mostly ones where people post and argue about studies (pineapple enzymes, Layne Norton on carbs and fat, the SWAP-MEAT trial, skin and wrinkles, vegetarian mortality, the LDL consensus statement, calcium, artificial sweeteners, walnuts, and whole grains).
 
-**How I labelled them:** I labelled the first 20 comments cold, with no tools or help, and marked them `cold` in the note column. My original cold labels are saved in `cold_batch.csv`. The other 169 comments were pre-labelled by an AI tool (Claude Code) using my definitions and my rule, and marked `pre-labelled` in the note column. I then read every pre-labelled comment and marked it `pre-labelled, checked`, or `pre-labelled, corrected` if I changed the label. See "How I Used AI" for the disclosure.
+**How I labelled them:** I labelled the first 20 comments cold, with no tools or help, and marked them `cold` in the note column. My original cold labels are saved in `cold_batch.csv`. The other comments were pre-labelled by an AI tool (Claude Code) using my definitions and my rule, and marked `pre-labelled` in the note column. I then read every pre-labelled comment and marked it `pre-labelled, checked`, or `pre-labelled, corrected` if I changed the label. The 59 stretch comments have `(stretch)` in the note column. See "How I Used AI" for the disclosure.
 
 **Counts per label:**
+
+First run (`results.json`, 189 comments):
 
 | Label | Count | Share |
 |---|---|---|
@@ -118,7 +122,16 @@ I wrote this rule in two steps. My first version said a comment needed "a checka
 | analysis | 37 | 19.6% |
 | **Total** | 189 | 100% |
 
-I stopped at 189 rows, which is under the 200 target and above the 150 floor, because I had run out of time to collect and review more. `analysis` is my thinnest label, and no label is above 60% of the file.
+Final `labels.csv` (248 comments, after the stretch feature):
+
+| Label | Count | Share |
+|---|---|---|
+| hot_take | 96 | 38.7% |
+| analysis | 89 | 35.9% |
+| experience | 63 | 25.4% |
+| **Total** | 248 | 100% |
+
+I collected 189 comments for the first run, which is under the 200 target and above the 150 floor. I then collected 59 more to give `analysis`, my thinnest label, more examples. While reviewing them I moved 7 of the 59 to `hot_take` under my rule, so 52 of them are extra `analysis` rows. No label is above 60% of the file.
 
 **Three hard cases**
 
@@ -155,6 +168,8 @@ I stopped at 189 rows, which is under the 200 target and above the 150 floor, be
 
 **Split sizes:** 131 train, 29 validation, 29 test. Test split by label: `analysis` 6, `hot_take` 13, `experience` 10. `analysis` has fewer than 8 test examples, so its score will move a lot between seeds.
 
+`results.json` and `test_split.csv` are this first run, on the first 189 comments. Two later runs (my stretch features) are saved separately: `results_run2_epochs5.json` (5 epochs, same 189 comments) and `results_run3_extra_analysis.json` with `test_split_run3.csv` (default settings, all 248 comments, 38 test posts).
+
 ---
 
 ## How I Used AI
@@ -175,7 +190,7 @@ I used Claude Code (an AI coding assistant) throughout this project.
 
 **Pre-labelling disclosure:**
 
-I labelled 20 comments cold with no help. The other 169 comments were pre-labelled by Claude Code and marked `pre-labelled` in the note column. I read every one of those 169 and marked each `pre-labelled, checked` or `pre-labelled, corrected`. I changed 11 of the 169 pre-labels, all from `analysis` to `hot_take`, and all because of my named-source rule. I also used the AI to clean pasted thread text (removing usernames, vote counts and deleted comments), to set up the environment and notebook, and to suggest the target for criterion 5 in `criteria.md` (accuracy of at least 0.75 on the model's most-confident third). The other four targets and all the reasons in `criteria.md` are mine. This README was drafted with the AI from the facts of the project, and I edited it.
+I labelled 20 comments cold with no help. The other 169 comments were pre-labelled by Claude Code and marked `pre-labelled` in the note column. I read every one of those 169 and marked each `pre-labelled, checked` or `pre-labelled, corrected`. I changed 11 of the 169 pre-labels, all from `analysis` to `hot_take`, and all because of my named-source rule. The 59 stretch comments were also pre-labelled by Claude Code (all as `analysis`), and I reviewed every one, changing 7 of them to `hot_take`. In total I changed 18 of the 228 pre-labelled comments, all from `analysis` to `hot_take`. I also used the AI to clean pasted thread text (removing usernames, vote counts and deleted comments), to set up the environment and notebook, and to suggest the target for criterion 5 in `criteria.md` (accuracy of at least 0.75 on the model's most-confident third). The other four targets and all the reasons in `criteria.md` are mine. This README was drafted with the AI from the facts of the project, and I edited it.
 
 ---
 
@@ -204,7 +219,29 @@ What moved: with 3 epochs the model never predicted `analysis` (all 6 test `anal
 
 How much I trust this: it is one seed and 29 test posts, so each post is worth about 3.4 points of accuracy. Three more posts correct is the whole difference in accuracy, and two of them are `analysis` posts. I can't tell yet from one run whether 5 epochs is better or whether this seed got lucky. Next unit's three seeds are what will show that.
 
-*(Stretch 2 is filled in below once it is built.)*
+### Stretch 2 result: extra `analysis` examples
+
+I added 59 comments aimed at `analysis`, all of them naming or linking a source, from 10 new r/nutrition threads. After my review, 52 are `analysis` (above the 50 I declared) and 7 are `hot_take`. That took `analysis` from 37 to 89 comments. I retrained with the default settings (3 epochs, seed 42) on all 248 comments. Third run: `results_run3_extra_analysis.json`.
+
+| Measure | Run 1 (189 comments, 29 test posts) | Run 3 (248 comments, 38 test posts) | Change |
+|---|---|---|---|
+| Accuracy | 0.621 (18 of 29) | 0.789 (30 of 38) | +0.168 |
+| Macro F1 | 0.468 | 0.768 | +0.300 |
+| F1, `analysis` | 0.000 (6 test posts) | 0.880 (13 test posts) | +0.880 |
+| F1, `hot_take` | 0.621 (13 test posts) | 0.800 (15 test posts) | +0.179 |
+| F1, `experience` | 0.783 (10 test posts) | 0.625 (10 test posts) | −0.158 |
+| Accuracy, most-confident third | 0.889 | 1.000 | +0.111 |
+| Accuracy, least-confident third | 0.222 | 0.667 | +0.445 |
+
+What moved: `analysis` went from never being predicted correctly (0 of 6) to 11 of 13 correct, which is almost all of the improvement. `experience` got worse: 5 of its 10 test posts were called `hot_take`.
+
+How much I trust this, and why it is not a clean comparison:
+- The test set changed. Run 3 has 38 test posts, not 29, and 13 of them are `analysis`, so the two runs are not scored on the same posts.
+- The new `analysis` comments are mostly long, link-heavy comments from science threads, which may be easier for the model to recognise than my earlier, shorter `analysis` comments. Part of the gain could be that the data became more uniform for this label, not only that there was more of it.
+- `experience` fell from 33% to 25% of the data, which may be why it got worse. That is a guess, and I have not tested it.
+- It is still a single seed.
+
+Next unit's three seeds will show how much of this holds up.
 
 <!-- ═══════════════════════ UNIT 6 — THE TEST ═══════════════════════
 
