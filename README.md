@@ -263,8 +263,8 @@ Next unit's three seeds will show how much of this holds up.
 | F1 — `label_two` |  |  |  |
 
 **What I predicted before I looked:**
-<!-- Milestone 1 asks you to write this BEFORE seeing the trained numbers. A
-     prediction made afterwards isn't one. -->
+
+I predicted, before running the baseline, that the zero-shot model would fumble on `analysis` and `hot_take`, and that it would mix those two up with each other (calling `analysis` posts `hot_take` and `hot_take` posts `analysis`).
 
 **What the gap actually means:**
 <!-- If the baseline matched your trained model, your fine-tuning added
