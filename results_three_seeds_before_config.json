@@ -1,0 +1,40 @@
+{
+  "run_label": "before",
+  "file": "results_three_seeds_before.json",
+  "written_by": "notebook section 6 (takemeter.ipynb), run on a copy with RUN_LABEL=\"before\"",
+  "date": "2026-10-21",
+  "base_model": "distilbert-base-uncased",
+  "seeds": [
+    42,
+    7,
+    2024
+  ],
+  "epochs": 3,
+  "learning_rate": 2e-05,
+  "batch_size": 16,
+  "max_length": 128,
+  "split": "70/15/15 train/validation/test, redrawn for each seed (set by the notebook)",
+  "data_file": "labels.csv",
+  "data_rows": 248,
+  "label_counts": {
+    "hot_take": 96,
+    "experience": 63,
+    "analysis": 89
+  },
+  "label_shares": {
+    "hot_take": 0.387,
+    "experience": 0.254,
+    "analysis": 0.359
+  },
+  "labels_csv_last_changed_in_commit": "18357e87846ce404f550a3de479b52c1da10dbaa",
+  "n_test_per_seed": [
+    38,
+    38,
+    38
+  ],
+  "device": "cpu",
+  "device_name": "CPU",
+  "torch_version": "2.14.1+cpu",
+  "python": "3.12.3",
+  "changed_from_unit5_defaults": "nothing"
+}
