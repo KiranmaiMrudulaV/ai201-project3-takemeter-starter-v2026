@@ -2,7 +2,11 @@
 #
 # Copy these from your README so the baseline is judged on exactly the
 # definitions you wrote. baseline.py reads this file.
+#
+# SOURCE OF TRUTH: the "Label Taxonomy" section of README.md. If a definition
+# there changes, change it here too. These three lines are copied word for word
+# from the README.
 
-analysis: makes a claim backed by a specific fact someone else could look up, such as a study, a published figure, or a named source
-hot_take: a confident claim about food or health with no checkable fact behind it
-experience: describes what happened to the writer personally, such as their results, symptoms or routine, without claiming it applies to everyone
+analysis: Makes a claim backed by a named, findable source, such as a link, or a named study, paper, book or statistic.
+hot_take: A confident claim about food or health with no named, findable source behind it.
+experience: Describes what happened to the writer personally, such as their results, symptoms or routine, without claiming it applies to everyone.
