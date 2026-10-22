@@ -255,12 +255,25 @@ Next unit's three seeds will show how much of this holds up.
 <!-- Both models on the same posts. `python baseline.py --trained results.json`
      prints this table for you. -->
 
+Both models were scored on the same 29 posts in `test_split.csv`, the held-out split from my first training run (`results.json`: seed 42, trained on my first 189 comments). The baseline is `facebook/bart-large-mnli` (zero-shot, no training) using my three label definitions from `label_definitions.txt`. It ran on CPU. Its predictions are in `baseline_results.json`.
+
 | Measure | Baseline | Trained | Difference |
 |---|---|---|---|
-| Overall accuracy |  |  |  |
-| Macro F1 |  |  |  |
-| F1 — `label_one` |  |  |  |
-| F1 — `label_two` |  |  |  |
+| Overall accuracy | 0.241 | 0.621 | +0.379 |
+| Macro F1 | 0.178 | 0.468 | +0.290 |
+| F1 — `analysis` | 0.353 | 0.000 | -0.353 |
+| F1 — `experience` | 0.182 | 0.783 | +0.601 |
+| F1 — `hot_take` | 0.000 | 0.621 | +0.621 |
+
+The baseline's confusion matrix on those 29 posts (rows are true labels, columns are its guesses):
+
+| true \ predicted | analysis | hot_take | experience |
+|---|---|---|---|
+| **analysis** | 6 | 0 | 0 |
+| **hot_take** | 13 | 0 | 0 |
+| **experience** | 9 | 0 | 1 |
+
+It called 28 of the 29 posts `analysis` and never predicted `hot_take`. For reference, always guessing `hot_take` would have scored 13 of 29 = 0.448, so the baseline did worse than ignoring the post.
 
 **What I predicted before I looked:**
 
@@ -279,29 +292,44 @@ I predicted, before running the baseline, that the zero-shot model would fumble 
 <!-- Five criteria across three seeds. The notebook's section 6 prints the
      spread table; the Target and Verdict columns are yours. -->
 
+Trained with the default settings (3 epochs, learning rate 2e-5, batch size 16, 128 tokens) on all 248 comments in `labels.csv`, three random 70/15/15 splits (seeds 42, 7, 2024), each tested on 38 posts. Device: CPU (torch 2.14.1+cpu, Python 3.12.3). Results: `results_three_seeds_before.json`; the exact configuration is in `results_three_seeds_before_config.json`.
+
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. Overall accuracy on the held-out test split | ≥ 0.60 on each seed | 0.789 | 0.579 | 0.763 | MISSED |
+| 2. Every label's F1 (lowest label shown) | ≥ 0.50 on each seed | 0.625 (`experience`) | 0.000 (`experience`) | 0.625 (`experience`) | MISSED |
+| 3. Largest label's share of `labels.csv` | ≤ 60% | 38.7% (`hot_take`) | 38.7% | 38.7% | MET |
+| 4. Agreement with the staff labels | ≥ 70% | 97% (29 of 30) | same check | same check | MET |
+| 5. Accuracy on the most-confident third of predictions | ≥ 0.75 on each seed | 1.000 | 0.833 | 1.000 | MET |
+
+Criteria 3 and 4 do not change with the seed: criterion 3 is a property of the file, and criterion 4 is one comparison against the staff set (see the Agreement Report). The full per-label F1 by seed:
+
+| Measure | Seed 42 | Seed 7 | Seed 2024 | Spread |
+|---|---|---|---|---|
+| Overall accuracy | 0.789 | 0.579 | 0.763 | 0.211 |
+| Macro F1 | 0.768 | 0.456 | 0.750 | 0.312 |
+| F1 — `analysis` | 0.880 | 0.769 | 0.870 | 0.111 |
+| F1 — `hot_take` | 0.800 | 0.600 | 0.757 | 0.200 |
+| F1 — `experience` | 0.625 | 0.000 | 0.625 | 0.625 |
+
+Accuracy moved 0.211 across the three seeds, more than ten points, so my dataset is too small or too lopsided for a stable measure. Test posts per label are `analysis` 13, `hot_take` 15, `experience` 10.
 
 ### Confusion matrix
+
+Seed 42 (the matrix the notebook prints). Rows are true labels, columns are the model's guesses.
 
 <!-- ⚠️ TYPED AS A MARKDOWN TABLE. The notebook prints one ready to paste.
      An image of a matrix earns nothing. -->
 
-| true \ predicted |  |  |  |
+| true \ predicted | analysis | hot_take | experience |
 |---|---|---|---|
-| **** |  |  |  |
-| **** |  |  |  |
-| **** |  |  |  |
+| **analysis** | 11 | 1 | 1 |
+| **hot_take** | 1 | 14 | 0 |
+| **experience** | 0 | 5 | 5 |
 
 **My biggest off-diagonal number, and what it means:**
-<!-- Not "the model made mistakes" — WHICH boundary it didn't learn, and which
-     direction. "7 real analysis posts were called hot_take and only 3 went the
-     other way" is a direction, not just an error rate. -->
+
+5 real `experience` posts were called `hot_take`, and 0 `hot_take` posts were called `experience`. So the model has not learned the boundary between a personal account and an unsupported general claim, and it errs toward `hot_take`. On seed 7 this was total: all 10 `experience` test posts were called `hot_take`, and the model never predicted `experience` once.
 
 
 
