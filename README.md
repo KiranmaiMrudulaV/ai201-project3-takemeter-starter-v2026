@@ -279,9 +279,33 @@ It called 28 of the 29 posts `analysis` and never predicted `hot_take`. For refe
 
 I predicted, before running the baseline, that the zero-shot model would fumble on `analysis` and `hot_take`, and that it would mix those two up with each other (calling `analysis` posts `hot_take` and `hot_take` posts `analysis`).
 
+**Baseline with bare label names (no definitions):** I also ran the baseline once with no `label_definitions.txt`, so the model only sees the words `analysis`, `hot_take` and `experience`. Same 29 posts, same model, on CPU. Results are in `baseline_results_bare_names.json`.
+
+| Measure | Baseline (my definitions) | Baseline (bare names) | Trained (run 1) |
+|---|---|---|---|
+| Overall accuracy | 0.241 | 0.621 | 0.621 |
+| Macro F1 | 0.178 | 0.462 | 0.468 |
+| F1 — `analysis` | 0.353 | 0.000 | 0.000 |
+| F1 — `hot_take` | 0.000 | 0.688 | 0.621 |
+| F1 — `experience` | 0.182 | 0.700 | 0.783 |
+
+The bare-names baseline's confusion matrix (rows are true labels, columns are its guesses):
+
+| true \ predicted | analysis | hot_take | experience |
+|---|---|---|---|
+| **analysis** | 0 | 5 | 1 |
+| **hot_take** | 0 | 11 | 2 |
+| **experience** | 0 | 3 | 7 |
+
+It never predicted `analysis`. The baseline in the first table is the one the brief describes (my definitions as the prompt). The bare-names run turned out to be the stronger opponent, so I report both.
+
 **What the gap actually means:**
-<!-- If the baseline matched your trained model, your fine-tuning added
-     nothing — and that is a real finding, not a failure. Say it plainly. -->
+
+The result depends on which baseline I use. Against the baseline with my definitions, my trained model wins by a lot (accuracy 0.621 vs 0.241), but that baseline called 28 of 29 posts `analysis` and scored below always guessing `hot_take` (0.448), so beating it is not much of a test. Without my definitions, the zero-shot model got 0.621 accuracy, exactly what my trained model got, and macro F1 of 0.462 vs 0.468. Against that stronger baseline my first fine-tuning run added essentially nothing on accuracy. The trained model was better on `experience` (0.783 vs 0.700) and slightly worse on `hot_take` (0.621 vs 0.688), and both scored 0.000 on `analysis`.
+
+Three things I learned. First, my definitions made the zero-shot model much worse (0.241 with them, 0.621 without), so what they were worth for this model was negative. My guess, which I have not tested, is that this kind of model reads each long definition as a sentence to match, and the `analysis` definition, which talks about links and studies, matches almost any informational post. Second, this comparison is on only 29 posts, so each post is worth about 3.4 points of accuracy and a tie is within noise. Third, my trained model improved after this first run: with 5 epochs on the same 29 posts it scored 0.724 (accuracy) and 0.500 on `analysis` (`results_run2_epochs5.json`), which would beat the bare-names baseline by 0.103. That run changed a hyperparameter, so I am not using it as the main comparison.
+
+My prediction (the baseline would fumble on `analysis` and `hot_take` and mix them up) was right for the baseline with my definitions on `hot_take` (F1 0.000, all 13 called `analysis`). For bare names it was wrong on `hot_take` (F1 0.688) and right only on `analysis`.
 
 
 
