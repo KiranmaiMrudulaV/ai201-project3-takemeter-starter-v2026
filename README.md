@@ -337,55 +337,26 @@ I predicted, before running the baseline, that the zero-shot model would fumble 
 
 ## Agreement Report
 
-<!-- Your rate against the staff set, and every disagreement adjudicated.
+I labelled the 30 staff posts under the staff taxonomy in `data/staff_taxonomy.md` (not my own), saved them as `my_staff_labels.csv`, and committed that file before I saw the staff answers. Then I compared them with `python agreement.py` (`agreement_results.json`).
 
-     Remember you labelled these 30 under the STAFF taxonomy in
-     data/staff_taxonomy.md, not your own — so every argument below is made
-     from those definitions and those decision rules. -->
+**Agreement rate:** 29 / 30 = 97%
 
-**Agreement rate:** ___ / 30 = ___%
-
-<!-- Nobody grades this number. A 60% who argues every disagreement from the
-     stated rules beats a 95% who wrote "staff was right" nine times. Several
-     of the 30 were chosen because they're genuinely ambiguous — you should be
-     winning some of these. -->
+Staff flagged 7 of the 30 posts as borderline. I agreed with staff on 6 of those 7.
 
 **Disagreements**
 
-<!-- Three lines each: the post, both labels, and who you think is right and
-     why — grounded in the staff definitions you were both applying.
-
-     Then sort each into one of three piles:
-       (a) the rule covered it and I applied it loosely → a consistency problem
-       (b) the rule genuinely doesn't say               → a gap in the definitions
-       (c) the rule is ambiguous here and my reading is defensible → argue it.
-           This is a legitimate win.
-
-     Pile (a) is the one that matters most for your diagnosis: if you applied a
-     written rule two different ways on 30 posts, that is direct evidence about
-     what you did across your own 200. -->
-
 **1.**
-> *The post:*
+> *The post:* "Times are down about 3% since the shoe rules changed, so obviously the shoes are the whole story and the sport has a problem."
 >
-> *Staff said / I said:*
+> *Staff said / I said:* `hot_take` / `analysis`
 >
-> *My call, and why:*
+> *My call, and why:* Staff is right. Rule 1 in the staff taxonomy says a post is `analysis` only if the checkable fact is load-bearing, and a number that is decoration on a conclusion the writer had already reached makes it a `hot_take` with a statistic in it. Here "so obviously the shoes are the whole story" is what does the work, and the 3% only decorates it. The post also gives nothing to check the number against (no year, no source), so nothing supports the jump from "times are down" to "the shoes are the whole story". Staff's own example, "Super shoes have ruined racing, times are down 3% since 2017", has the same shape. I read the 3% as a checkable stat and stopped there.
 >
-> *Which pile:*
-
-**2.**
-> *The post:*
->
-> *Staff said / I said:*
->
-> *My call, and why:*
->
-> *Which pile:*
+> *Which pile:* (a) the rule covered it and I applied it loosely.
 
 **What the pattern in my disagreements tells me:**
 
-
+There is only one disagreement, so I can't claim a pattern from this set alone. It is pile (a): the staff rule covered the case and I applied it loosely, by treating a bare number as support. That is the same kind of slip I made on my first, cold pass in Unit 5, when I labelled two comments `analysis` because they contained a statistic or named a concept, and only later tightened my rule to require a named source. I agreed with staff on 29 of 30 posts and on 6 of the 7 borderline ones, which suggests I apply a written rule fairly consistently. But this check cannot test the boundary my model struggles with most, `experience` vs `hot_take`, because the staff taxonomy has `reaction` and not `experience`. So it weakens "my labelling was generally inconsistent" as an explanation, but it does not rule out that I applied my own `experience` boundary inconsistently.
 
 ---
 
