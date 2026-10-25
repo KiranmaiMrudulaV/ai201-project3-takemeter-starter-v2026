@@ -1,0 +1,51 @@
+{
+  "run_label": "after",
+  "file": "results_three_seeds_after.json",
+  "written_by": "notebook section 6 (takemeter.ipynb), run on a copy with RUN_LABEL=\"after\" and EXTRA_CSV=\"labels_extra.csv\"",
+  "date": "2026-10-24",
+  "base_model": "distilbert-base-uncased",
+  "seeds": [
+    42,
+    7,
+    2024
+  ],
+  "epochs": 3,
+  "learning_rate": 2e-05,
+  "batch_size": 16,
+  "max_length": 128,
+  "split": "same 70/15/15 split from labels.csv with the same seeds as the before run, so the validation and test posts are identical; the extra rows are appended to the training side only",
+  "data_file": "labels.csv",
+  "data_rows": 248,
+  "label_counts": {
+    "hot_take": 96,
+    "experience": 63,
+    "analysis": 89
+  },
+  "label_shares": {
+    "hot_take": 0.387,
+    "experience": 0.254,
+    "analysis": 0.359
+  },
+  "labels_csv_last_changed_in_commit": "18357e87846ce404f550a3de479b52c1da10dbaa",
+  "n_test_per_seed": [
+    38,
+    38,
+    38
+  ],
+  "device": "cpu",
+  "device_name": "CPU",
+  "torch_version": "2.14.1+cpu",
+  "python": "3.12.3",
+  "changed_from_unit5_defaults": "nothing",
+  "extra_training_file": "labels_extra.csv",
+  "extra_training_rows": 27,
+  "extra_label_counts": {
+    "experience": 26,
+    "hot_take": 1,
+    "analysis": 0
+  },
+  "extra_rows_in_validation_or_test": 0,
+  "labels_extra_csv_added_in_commit": "71ed4ca",
+  "notebook_hook_added_in_commit": "eee9549",
+  "changed_from_before_run": "only the training data: 27 extra hand-labelled rows (26 experience, 1 hot_take) added to training. Labels, taxonomy, criteria, base model, epochs, learning rate, batch size, max_length, seeds and test posts are unchanged."
+}
