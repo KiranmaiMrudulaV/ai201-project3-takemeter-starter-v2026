@@ -504,6 +504,16 @@ What I would not claim:
 
 ---
 
+## Unit 6 Stretch Features
+
+I am declaring these three stretch features before building any of them. This section is committed before any stretch work exists.
+
+1. **A confidence check.** I will report whether the model's confident predictions are right more often than its unsure ones, for the before run and the after run, across all three seeds. The numbers come from the `confidence` block the notebook already wrote into `results_three_seeds_before.json` and `results_three_seeds_after.json` (accuracy on the most-confident third and the least-confident third, and mean confidence when right and when wrong). Those numbers existed before this declaration. What I am building is the comparison and the written conclusion.
+2. **A per-label error write-up for `experience`.** `experience` is the worst label in my seed-42 confusion matrix (5 of 10 called `hot_take`, in Run Log — Before). The notebook doesn't save per-post predictions, so I will re-run the before configuration (seeds 42, 7, 2024, the same settings and test posts) and save each test post's prediction, then check the totals against `results_three_seeds_before.json`. I will read the `experience` posts called `hot_take`, say which label they get confused with, and write what those posts have in common. If the re-run does not reproduce the saved numbers exactly, I will say so.
+3. **A second measured improvement.** One more change, from the diagnosis that `experience` was under-trained: `EPOCHS = 3` → `EPOCHS = 5`, on top of the 27 extra rows from my first improvement. Nothing else changes (same labels, taxonomy, criteria, seeds, learning rate, batch size, and the same validation and test posts). I will run it across seeds 42, 7 and 2024, write a third run log in the same five-row table format with `results_three_seeds_after_epochs5.json` and a configuration file, and say whether it helped. This change stacks on the first, so its effect is measured against the after run, not the before run.
+
+---
+
 ## What's Still Broken
 
 <!-- For each criterion still missed: what you'd do, and why you stopped. -->
