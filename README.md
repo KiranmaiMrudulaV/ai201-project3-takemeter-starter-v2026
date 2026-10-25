@@ -192,6 +192,22 @@ I used Claude Code (an AI coding assistant) throughout this project.
 
 I labelled 20 comments cold with no help. The other 169 comments were pre-labelled by Claude Code and marked `pre-labelled` in the note column. I read every one of those 169 and marked each `pre-labelled, checked` or `pre-labelled, corrected`. I changed 11 of the 169 pre-labels, all from `analysis` to `hot_take`, and all because of my named-source rule. The 59 stretch comments were also pre-labelled by Claude Code (all as `analysis`), and I reviewed every one, changing 7 of them to `hot_take`. In total I changed 18 of the 228 pre-labelled comments, all from `analysis` to `hot_take`. I also used the AI to clean pasted thread text (removing usernames, vote counts and deleted comments), to set up the environment and notebook, and to suggest the target for criterion 5 in `criteria.md` (accuracy of at least 0.75 on the model's most-confident third). The other four targets and all the reasons in `criteria.md` are mine. This README was drafted with the AI from the facts of the project, and I edited it.
 
+**Unit 6 moments**
+
+**Moment 3**
+
+- *What I asked for:* After the before run missed two of my criteria, I asked the AI how to think about why.
+- *What came back:* A list of possible causes (too few `experience` examples, a boundary I applied inconsistently, a hard label pair, a shortcut the model learned, truncation), with statistics it computed from `labels.csv` (row counts, how often each label has a link, how often each label uses first-person words, and the 5-epoch result).
+- *What I changed:* I picked two causes myself: too few `experience` examples, and examples that are narrow and incomplete. The AI pointed out that the link shortcut explains `analysis` and not the `experience` miss, so I narrowed that claim, and it is written that way above. I also kept the line about what I could not rule out, because my agreement check cannot test the `experience` boundary.
+
+**Moment 4**
+
+- *What I asked for:* More varied `experience` examples for the improvement.
+- *What came back:* The AI could not open Reddit, so I pasted five threads. It picked 27 whole comments from them and showed them to me one at a time, with a one-line description of each and a lean on the first one.
+- *What I changed:* I labelled each of the 27 myself: 26 `experience` and 1 `hot_take`. I did not use any AI label. The AI chose the candidates, so my labels only cover comments it picked, and I flag that as a selection bias above.
+
+**Unit 6 disclosure:** The AI ran the notebook for the three-seed runs and the baseline on copies, restored the files the notebook overwrites, filled in the result tables from the JSON files, wrote the one notebook change (`EXTRA_CSV`), and drafted the README text for Unit 6, which I approved and edited. My own work is the 30 staff labels (saved and committed before I saw the answer key), the adjudication of the one disagreement, the labels on the 27 new comments, my predictions, and the choice of diagnosis.
+
 ---
 
 ## Stretch Features
@@ -366,11 +382,11 @@ Seed 42 (the matrix the notebook prints). Rows are true labels, columns are the 
 
 | # | Criterion | Target | Verdict | How I decided |
 |---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Overall accuracy on the held-out test split | ≥ 0.60 on all three seeds | **MISSED** | Accuracy was 0.789 / 0.579 / 0.763. Seed 7 is below 0.60, and the target has to hold on every seed. |
+| 2 | Every label's F1 | ≥ 0.50 on all three seeds | **MISSED** | The lowest label was `experience` on every seed: 0.625 / 0.000 / 0.625. On seed 7 it is below 0.50 (the model never predicted it). |
+| 3 | Largest label's share of `labels.csv` | ≤ 60% | **MET** | The largest is `hot_take`, 96 of 248 rows = 38.7%. |
+| 4 | Agreement with the staff labels | ≥ 70% | **MET** | 29 of 30 posts = 97% (see the Agreement Report). |
+| 5 | Accuracy on the most-confident third of predictions | ≥ 0.75 on all three seeds | **MET** | 1.000 / 0.833 / 1.000, all at or above 0.75 (12 predictions per third). |
 
 **Diagnoses**
 
@@ -382,6 +398,20 @@ Seed 42 (the matrix the notebook prints). Rows are true labels, columns are the 
      ⚠️ Use your agreement report as evidence. It is the only instrument you
      have that can tell a LABELLING problem from a MODEL problem, and this
      section is graded on whether you used it that way. -->
+
+**Criteria 1 and 2 (accuracy and every-label F1): one cause, `experience`.**
+
+Both misses come down to the same label. In the before run `experience` had the lowest F1 on all three seeds (0.625 / 0.000 / 0.625). On seeds 42 and 2024, 5 of the 10 `experience` test posts were called `hot_take` and none went the other way. On seed 7 the model never predicted `experience` once, so all 10 were called `hot_take`, which is what pulled accuracy down to 0.579. My diagnosis is **too few examples of `experience`**, together with examples that are narrow, not varied enough, and not complete enough to show the boundary.
+
+How I know:
+
+- **Too few examples.** `experience` is my smallest label: 63 of 248 rows (25%), so about 44 in training and 10 in each test split. A label with 10 test posts swings a lot (each post is 10 points of its recall), which is how one seed could go to 0.000 while the other two stayed at 0.625.
+- **The examples are narrow.** Only 4 of the 63 are my own cold labels. The other 59 were pre-labelled by the AI and checked by me, so they are in a narrower range of voices than real comments. By a simple word search, 16 of the 63 mix a personal story with a general-claim word (*everyone, always, never, you should*). Vegan or vegetarian stories (2 rows), keto or fat (3) and carbs (5) are thin. In a stretch run on the same data (`EPOCHS = 5`, first 189 comments), `experience` F1 went from 0.783 to 0.833, which fits a label that was under-trained and not hopeless.
+- **It is not the staff-agreement kind of labelling problem.** My agreement with staff was 97%, and I agreed on 6 of the 7 borderline posts, so I apply a written rule consistently. I have to be honest about the limit of that: the staff taxonomy has `reaction`, not `experience`, so the agreement report cannot test my `experience` vs `hot_take` boundary. What I can say is that it weakens "my labelling is generally sloppy", and it leaves open that I applied my own `experience` boundary inconsistently. My improvement run (see below) is the evidence on that: when I labelled 27 new posts under the same rule and added them to training, `experience` F1 went up on every seed. If my boundary were inconsistent, more rows labelled under it would have added noise, not signal.
+- **It is not a task the model can't reach.** The zero-shot baseline with bare label names got 7 of 10 `experience` posts right with no training at all, so the label can be found from this kind of text.
+- **A shortcut explains `analysis`, not `experience`.** 72% of my `analysis` rows contain a link, against 3% of `hot_take` and 0% of `experience`, so the model has an easy cue for `analysis` (which scores 0.77–0.88). `experience` and `hot_take` have no such cue, since 37 of my 96 `hot_take` rows also use *I / my / me*. With few examples and no easy cue, the model fell back on the larger label, `hot_take`. I cannot claim the link shortcut caused the `experience` miss. It is my best explanation of why `analysis` looked fine while `experience` did not.
+
+What I ruled out, and what I couldn't: I did not look at the individual misclassified `experience` posts (the notebook doesn't save per-post predictions), so I can't say whether the 5 errors were real boundary cases. That is a gap in my evidence.
 
 
 
@@ -416,19 +446,56 @@ There is only one disagreement, so I can't claim a pattern from this set alone. 
 
 **What I changed:**
 
+I added 27 new hand-labelled comments to the **training data only**: 26 `experience` and 1 `hot_take`. They are in `labels_extra.csv`. Nothing else changed: same labels, same definitions, same `criteria.md`, same base model and training settings, same three seeds. I kept the new rows out of `labels.csv` on purpose. The notebook still draws each seed's split from `labels.csv` and then adds the extra rows to the training side only, so the validation and test posts are exactly the ones the before run used (38 test posts per seed, with an assertion in the notebook that no extra row appears in validation or test). That makes the before and after runs a controlled comparison.
+
+Where the 27 came from: five public Reddit threads I pasted in (r/Protein, r/PetiteFitness, r/keto, r/Biohackers and r/AskFitnessIndia), whole comments only. The AI could not open Reddit itself, so it picked candidates from the threads I pasted. It chose comments it expected to be `experience`, which is a selection bias I should flag. I then labelled every one myself, one at a time: 26 `experience` and 1 `hot_take` (the short joking "protein farts" comment). They cover keto, plant-based and low-carb stories, symptoms, and routines. I did not manage to cover vegan or sugar stories, because none of the pasted threads had them. They were checked for duplicates against `labels.csv`.
+
 **Which diagnosis pointed at it:**
+
+The diagnosis for criteria 1 and 2: `experience` is the smallest label (about 44 training rows) and its examples are narrow. Adding more varied `experience` examples tests that directly. If the cause were my boundary, or the task being out of reach, extra rows should not have helped.
 
 ### Run Log — After
 
+Same settings, same seeds, same test posts. Results: `results_three_seeds_after.json`; the configuration is in `results_three_seeds_after_config.json`.
+
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. Overall accuracy | ≥ 0.60 on each seed | 0.842 | 0.763 | 0.763 | MET (was MISSED) |
+| 2. Every label's F1 (lowest label shown) | ≥ 0.50 on each seed | 0.833 (`analysis`) | 0.690 (`hot_take`) | 0.690 (`hot_take`) | MET (was MISSED) |
+| 3. Largest label's share of `labels.csv` | ≤ 60% | 38.7% | 38.7% | 38.7% | MET (`labels.csv` is unchanged; with the 27 extra rows, the largest share is `hot_take` at 97 of 275 = 35.3%) |
+| 4. Agreement with the staff labels | ≥ 70% | 97% | same check | same check | MET |
+| 5. Accuracy on the most-confident third | ≥ 0.75 on each seed | 0.917 | 1.000 | 1.000 | MET |
+
+Before and after, side by side:
+
+| Measure | Seed 42 | Seed 7 | Seed 2024 |
+|---|---|---|---|
+| Accuracy, before → after | 0.789 → 0.842 | 0.579 → 0.763 | 0.763 → 0.763 |
+| Macro F1, before → after | 0.768 → 0.843 | 0.456 → 0.777 | 0.750 → 0.769 |
+| F1 `experience`, before → after | 0.625 → 0.857 | 0.000 → 0.900 | 0.625 → 0.818 |
+| Recall `experience`, before → after | 0.500 → 0.900 | 0.000 → 0.900 | 0.500 → 0.900 |
+| F1 `analysis`, before → after | 0.880 → 0.833 | 0.769 → 0.741 | 0.870 → 0.800 |
+| F1 `hot_take`, before → after | 0.800 → 0.839 | 0.600 → 0.690 | 0.757 → 0.690 |
+
+Across the three seeds, mean accuracy went from 0.711 to 0.789, and the spread between seeds from 0.211 to 0.079.
+
+Seed 42 confusion matrix after the improvement (rows are true labels, columns are guesses):
+
+| true \ predicted | analysis | hot_take | experience |
+|---|---|---|---|
+| **analysis** | 10 | 2 | 1 |
+| **hot_take** | 1 | 13 | 1 |
+| **experience** | 0 | 1 | 9 |
 
 **Did it help, and how do I know:**
+
+Yes, for the label I was targeting. `experience` recall went from 5 of 10 (and 0 of 10 on seed 7) to 9 of 10 on all three seeds, and `experience` F1 rose on every seed by 0.19 to 0.90. Because the test posts are identical, that gain cannot come from an easier test set, and because it appears on all three seeds it is not a lucky draw. Criteria 1 and 2, which I missed before, are now met on all three seeds. I did not touch the targets in `criteria.md`.
+
+What I would not claim:
+
+- **It did not help everything.** `analysis` F1 fell on all three seeds (by 0.03 to 0.07), and `hot_take` F1 fell on seed 2024 (0.757 → 0.690). Real `hot_take` posts called `experience` went from 0 on every seed to 1, 1 and 3. Since 26 of my 27 new rows are `experience`, my best guess is that I nudged the model toward that label. That is a guess I have not tested.
+- **The test sets are small.** Each test post is worth about 2.6 points of accuracy, and `experience` has only 10 test posts per seed. The pattern across seeds is more believable than any single number.
+- **One change, one result.** It supports "too few `experience` examples" as the cause of the miss. It does not prove that the other causes I listed (narrow examples, no easy cue for `experience`) played no part, and the new rows came from five threads I picked, so they may be easier than a random sample of comments.
 
 <!-- If it didn't, say so. Relabelling that didn't help is a genuinely
      interesting result and earns full credit. -->
@@ -441,11 +508,20 @@ There is only one disagreement, so I can't claim a pattern from this set alone. 
 
 <!-- For each criterion still missed: what you'd do, and why you stopped. -->
 
+After the improvement, none of the five criteria is missed, but the model is not finished, and the criteria that are met have thin margins. The lowest accuracy is 0.763 (target 0.60), the lowest label F1 is 0.690 on `hot_take` (target 0.50), and `hot_take` is the label that is now weakest on two of the three seeds. What is still broken:
+
+- **`hot_take` and `analysis` are blurry in both directions.** On seed 7, 4 real `hot_take` posts were called `analysis` and 3 real `analysis` posts were called `hot_take`. That is the pair I expected to be hard, and it still is. I did not try to fix it.
+- **I may have pushed the model too far toward `experience`.** 3 real `hot_take` posts were called `experience` on seed 2024, up from 0. If I did another round I would add varied `hot_take` examples that read like personal stories (37 of my 96 `hot_take` rows use *I / my / me*), so the model learns the boundary and not just the label counts.
+- **I could not check which test posts were wrong.** The notebook doesn't save per-post predictions, so I never read the individual `experience` posts the model got wrong. The next thing I would do is save them and read them.
+- **Why I stopped:** the brief allows one improvement, I used it on the diagnosed cause, and with 38 test posts per seed another small change would be hard to tell from noise.
+
 
 
 **The gap between what I meant my labels to capture and what the model
 learned:**
 <!-- Two sentences. Your confusion matrix is the evidence. -->
+
+I meant `experience` to be anything where the writer reports what happened to them without claiming it applies to everyone, but the model read the label as "not an obvious source-backed post and not an obvious claim", and my first matrix shows it: 5 real `experience` posts were called `hot_take` and 0 went the other way (all 10 on seed 7). It only started to see my boundary after I added 26 more varied personal accounts, which tells me my rule was clear to me but my 63 examples did not show it fully.
 
 
 
