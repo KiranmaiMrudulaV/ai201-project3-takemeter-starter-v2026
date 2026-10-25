@@ -339,7 +339,7 @@ Trained with the default settings (3 epochs, learning rate 2e-5, batch size 16, 
 | 1. Overall accuracy on the held-out test split | ≥ 0.60 on each seed | 0.789 | 0.579 | 0.763 | MISSED |
 | 2. Every label's F1 (lowest label shown) | ≥ 0.50 on each seed | 0.625 (`experience`) | 0.000 (`experience`) | 0.625 (`experience`) | MISSED |
 | 3. Largest label's share of `labels.csv` | ≤ 60% | 38.7% (`hot_take`) | 38.7% | 38.7% | MET |
-| 4. Agreement with the staff labels | ≥ 70% | 97% (29 of 30) | same check | same check | MET |
+| 4. Agreement with the staff labels | ≥ 70% | 97% (29 of 30) | 97% (29 of 30) | 97% (29 of 30) | MET |
 | 5. Accuracy on the most-confident third of predictions | ≥ 0.75 on each seed | 1.000 | 0.833 | 1.000 | MET |
 
 Criteria 3 and 4 do not change with the seed: criterion 3 is a property of the file, and criterion 4 is one comparison against the staff set (see the Agreement Report). The full per-label F1 by seed:
@@ -456,14 +456,14 @@ The diagnosis for criteria 1 and 2: `experience` is the smallest label (about 44
 
 ### Run Log — After
 
-Same settings, same seeds, same test posts. Results: `results_three_seeds_after.json`; the configuration is in `results_three_seeds_after_config.json`.
+Same settings, same seeds, same test posts, same device (CPU, torch 2.14.1+cpu, Python 3.12.3). Results: `results_three_seeds_after.json`; the configuration is in `results_three_seeds_after_config.json`.
 
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
 | 1. Overall accuracy | ≥ 0.60 on each seed | 0.842 | 0.763 | 0.763 | MET (was MISSED) |
 | 2. Every label's F1 (lowest label shown) | ≥ 0.50 on each seed | 0.833 (`analysis`) | 0.690 (`hot_take`) | 0.690 (`hot_take`) | MET (was MISSED) |
 | 3. Largest label's share of `labels.csv` | ≤ 60% | 38.7% | 38.7% | 38.7% | MET (`labels.csv` is unchanged; with the 27 extra rows, the largest share is `hot_take` at 97 of 275 = 35.3%) |
-| 4. Agreement with the staff labels | ≥ 70% | 97% | same check | same check | MET |
+| 4. Agreement with the staff labels | ≥ 70% | 97% (29 of 30) | 97% (29 of 30) | 97% (29 of 30) | MET |
 | 5. Accuracy on the most-confident third | ≥ 0.75 on each seed | 0.917 | 1.000 | 1.000 | MET |
 
 Before and after, side by side:
