@@ -401,17 +401,17 @@ Seed 42 (the matrix the notebook prints). Rows are true labels, columns are the 
 
 **Criteria 1 and 2 (accuracy and every-label F1): one cause, `experience`.**
 
-Both misses come down to the same label. In the before run `experience` had the lowest F1 on all three seeds (0.625 / 0.000 / 0.625). On seeds 42 and 2024, 5 of the 10 `experience` test posts were called `hot_take` and none went the other way. On seed 7 the model never predicted `experience` once, so all 10 were called `hot_take`, which is what pulled accuracy down to 0.579. My diagnosis is **too few examples of `experience`**, together with examples that are narrow, not varied enough, and not complete enough to show the boundary.
+Both misses come down to the same label. In the before run `experience` had the lowest F1 on all three seeds (0.625 / 0.000 / 0.625). On seeds 42 and 2024, 5 of the 10 `experience` test posts were called `hot_take`. In the other direction, 0 `hot_take` posts were called `experience` on seed 42 and 1 on seed 2024. On seed 7 the model never predicted `experience` once, so all 10 were called `hot_take`, which is what pulled accuracy down to 0.579. My diagnosis is **too few examples of `experience`**, together with examples that are narrow, not varied enough, and not complete enough to show the boundary.
 
 How I know:
 
 - **Too few examples.** `experience` is my smallest label: 63 of 248 rows (25%), so about 44 in training and 10 in each test split. A label with 10 test posts swings a lot (each post is 10 points of its recall), which is how one seed could go to 0.000 while the other two stayed at 0.625.
-- **The examples are narrow.** Only 4 of the 63 are my own cold labels. The other 59 were pre-labelled by the AI and checked by me, so they are in a narrower range of voices than real comments. By a simple word search, 16 of the 63 mix a personal story with a general-claim word (*everyone, always, never, you should*). Vegan or vegetarian stories (2 rows), keto or fat (3) and carbs (5) are thin. In a stretch run on the same data (`EPOCHS = 5`, first 189 comments), `experience` F1 went from 0.783 to 0.833, which fits a label that was under-trained and not hopeless.
-- **It is not the staff-agreement kind of labelling problem.** My agreement with staff was 97%, and I agreed on 6 of the 7 borderline posts, so I apply a written rule consistently. I have to be honest about the limit of that: the staff taxonomy has `reaction`, not `experience`, so the agreement report cannot test my `experience` vs `hot_take` boundary. What I can say is that it weakens "my labelling is generally sloppy", and it leaves open that I applied my own `experience` boundary inconsistently. My improvement run (see below) is the evidence on that: when I labelled 27 new posts under the same rule and added them to training, `experience` F1 went up on every seed. If my boundary were inconsistent, more rows labelled under it would have added noise, not signal.
+- **The examples are narrow.** Only 4 of the 63 are my own cold labels. The other 59 were pre-labelled by the AI and checked by me. They are real Reddit comments; AI pre-labelling alone does not establish that their voices are less varied. By a simple word search, 16 of the 63 mix a personal story with a general-claim word (*everyone, always, never, you should*). Vegan or vegetarian stories (2 rows), keto or fat (3) and carbs (5) are thin. In a stretch run on the same data (`EPOCHS = 5`, first 189 comments), `experience` F1 went from 0.783 to 0.833, which fits a label that was under-trained and not hopeless.
+- **It is not the staff-agreement kind of labelling problem.** My agreement with staff was 97%, and I agreed on 6 of the 7 borderline posts, so I apply a written rule consistently. I have to be honest about the limit of that: the staff taxonomy has `reaction`, not `experience`, so the agreement report cannot test my `experience` vs `hot_take` boundary. What I can say is that it weakens "my labelling is generally sloppy", and it leaves open that I applied my own `experience` boundary inconsistently. My improvement run (see below) is the evidence on that: when I labelled 27 new posts under the same rule and added them to training, `experience` F1 went up on every seed. This improvement supports adding more varied training examples, but it does not rule out inconsistent boundary labels: useful new examples can help even when some existing labels are ambiguous.
 - **It is not a task the model can't reach.** The zero-shot baseline with bare label names got 7 of 10 `experience` posts right with no training at all, so the label can be found from this kind of text.
 - **A shortcut explains `analysis`, not `experience`.** 72% of my `analysis` rows contain a link, against 3% of `hot_take` and 0% of `experience`, so the model has an easy cue for `analysis` (which scores 0.77–0.88). `experience` and `hot_take` have no such cue, since 37 of my 96 `hot_take` rows also use *I / my / me*. With few examples and no easy cue, the model fell back on the larger label, `hot_take`. I cannot claim the link shortcut caused the `experience` miss. It is my best explanation of why `analysis` looked fine while `experience` did not.
 
-What I ruled out, and what I couldn't: I did not look at the individual misclassified `experience` posts (the notebook doesn't save per-post predictions), so I can't say whether the 5 errors were real boundary cases. That is a gap in my evidence.
+The later prediction export allowed an audit of all five misclassified `experience` posts from seed 42. Two clearly describe personal outcomes, while three mix personal details with general claims or advice. This supports both a model-learning problem and possible label-boundary ambiguity. The individual examples are discussed in the Unit 6 stretch error audit.
 
 
 
@@ -514,6 +514,95 @@ I am declaring these three stretch features before building any of them. This se
 
 ---
 
+### Stretch result 1: Confidence check
+
+Each group contains 12 of the 38 test predictions. The most-confident and least-confident thirds together cover 24 posts; the remaining 14 are not included in this comparison.
+
+| Run | Seed | Most-confident accuracy | Least-confident accuracy | Gap |
+| --- | --- | --- | --- | --- |
+| Before | 42 | 1.000 | 0.667 | 0.333 |
+| Before | 7 | 0.833 | 0.167 | 0.667 |
+| Before | 2024 | 1.000 | 0.583 | 0.417 |
+| After extra examples | 42 | 0.917 | 0.667 | 0.250 |
+| After extra examples | 7 | 1.000 | 0.583 | 0.417 |
+| After extra examples | 2024 | 1.000 | 0.417 | 0.583 |
+
+The confident group is more accurate in all six runs. This supports confidence as a way to rank predictions for review, not as a calibrated probability of being correct. The groups are small, and the runs reuse overlapping source data, so these are not six independent confirmations.
+
+Before-run confidence values are from the previously captured experiment log; after-run values were checked against `results_three_seeds_after.json`.
+
+### Stretch result 2: Error audit for `experience`
+
+`predictions_before.csv` has 114 prediction records: 38 per seed. Its accuracy and confusion counts reproduce the saved before-run tables: 30/38, 22/38 and 29/38 correct. The seeds use different test splits, so these are not necessarily 114 distinct posts.
+
+All five seed-42 errors with true label `experience` were predicted `hot_take`:
+
+| Identifying excerpt | What the full comment shows | Interpretation |
+| --- | --- | --- |
+| “I have celiac as well” | Personal diagnosis and diet, wrapped in general claims about gluten-free food | Mixed personal account and general advice; the stored label is debatable under the written rule |
+| “I have seen lots of body builders” | Broad kidney-health claims followed by an observation about other people | Especially ambiguous: observing others is not clearly a report of the writer's own outcomes |
+| “I've recently switched to this for my morning meal” | Personal changes in caffeine, energy and weight, ending with a recommendation | A clear personal-outcome signal despite advice at the end |
+| “I have shifted my diet this year” | Personal food routine and feeling better, followed by meal examples | A clear personal account that the model missed |
+| “I also have celiac” | Personal diet details embedded in general claims and advice about replacement foods | Another mixed-boundary case |
+
+The two clearer personal accounts received confidence 0.3861 and 0.3880. The three mixed/generalized comments received 0.4646, 0.4359 and 0.4375.
+
+All five lack an external named source, but that alone cannot distinguish `experience` from `hot_take`. The evidence supports two problems: the model missed some explicit personal outcomes, and some stored labels combine personal details with general claims. I would review those mixed labels using a consistent dominant-purpose rule before further training. No test labels were changed for these reported experiments.
+
+This audit was prepared with ChatGPT from the exported predictions. It identifies candidate label problems; it does not claim that the model's alternative predictions are automatically correct or endorse the comments' health claims.
+
+### Stretch result 3: Second measured improvement, five epochs
+
+The intended single change was 3 to 5 epochs, stacked on the 27 extra training rows. Seeds remain 42, 7 and 2024.
+
+Results are in `results_three_seeds_after_epochs5.json`, with per-post output in `predictions_after_epochs5.csv`. The JSON reports CPU, torch 2.14.1+cpu, maximum length 128 and 38 test posts per seed.
+
+The run procedure specifies the same validation/test posts, learning rate and batch size; those settings and exact post identity should also be verified from the runner/configuration and prediction exports. A separate five-epoch configuration file has not been verified here.
+
+#### Third run log
+
+| Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
+| --- | --- | --- | --- | --- | --- |
+| 1. Overall accuracy | ≥ 0.60 on each seed | 0.868 | 0.789 | 0.816 | MET |
+| 2. Every label's F1 (lowest shown) | ≥ 0.50 on each seed | 0.833 (`analysis`) | 0.750 (`hot_take`) | 0.774 (`hot_take`) | MET |
+| 3. Largest label's share of `labels.csv` | ≤ 60% | 38.7% | 38.7% | 38.7% | MET; unchanged data |
+| 4. Agreement with staff | ≥ 70% | 97% (29/30) | 97% (29/30) | 97% (29/30) | MET; unchanged agreement exercise |
+| 5. Most-confident-third accuracy | ≥ 0.75 on each seed | 0.917 | 1.000 | 0.917 | MET |
+
+#### Comparison with the first improvement
+
+| Measure | Seed 42: 3 → 5 epochs | Seed 7: 3 → 5 epochs | Seed 2024: 3 → 5 epochs |
+| --- | --- | --- | --- |
+| Accuracy | 0.842 → 0.868 | 0.763 → 0.789 | 0.763 → 0.816 |
+| Macro F1 | 0.843 → 0.869 | 0.777 → 0.803 | 0.769 → 0.821 |
+| `analysis` F1 | 0.833 → 0.833 | 0.741 → 0.769 | 0.800 → 0.870 |
+| `hot_take` F1 | 0.839 → 0.875 | 0.690 → 0.750 | 0.690 → 0.774 |
+| `experience` F1 | 0.857 → 0.900 | 0.900 → 0.889 | 0.818 → 0.818 |
+
+Mean accuracy rose from 0.789 to 0.825, a gain of 3.51 percentage points. Each seed gained one, one and two correct predictions respectively. Mean macro F1 rose from 0.796 to 0.831. The accuracy spread stayed at 0.079.
+
+#### Five-epoch confusion matrix: Seed 42
+
+Rows are true labels; columns are predictions.
+
+| true \ predicted | analysis | hot_take | experience |
+| --- | --- | --- | --- |
+| **analysis** | 10 | 2 | 1 |
+| **hot_take** | 1 | 14 | 0 |
+| **experience** | 0 | 1 | 9 |
+
+#### Did it help?
+
+The longer run helped overall accuracy and macro F1 on all three seeds, conditional on the intended controlled setup.
+
+It did not consistently improve the label that motivated it: `experience` F1 improved on seed 42, fell slightly on seed 7 and stayed unchanged on seed 2024. `hot_take` F1 improved on every seed.
+
+On seed 2024, the most-confident-third accuracy fell from 1.000 to 0.917, although criterion 5 still passed.
+
+These small, repeatedly evaluated test sets support a limited experimental conclusion, not a guarantee of better performance on new threads.
+
+---
+
 ## What's Still Broken
 
 <!-- For each criterion still missed: what you'd do, and why you stopped. -->
@@ -522,8 +611,8 @@ After the improvement, none of the five criteria is missed, but the model is not
 
 - **`hot_take` and `analysis` are blurry in both directions.** On seed 7, 4 real `hot_take` posts were called `analysis` and 3 real `analysis` posts were called `hot_take`. That is the pair I expected to be hard, and it still is. I did not try to fix it.
 - **I may have pushed the model too far toward `experience`.** 3 real `hot_take` posts were called `experience` on seed 2024, up from 0. If I did another round I would add varied `hot_take` examples that read like personal stories (37 of my 96 `hot_take` rows use *I / my / me*), so the model learns the boundary and not just the label counts.
-- **I could not check which test posts were wrong.** The notebook doesn't save per-post predictions, so I never read the individual `experience` posts the model got wrong. The next thing I would do is save them and read them.
-- **Why I stopped:** the brief allows one improvement, I used it on the diagnosed cause, and with 38 test posts per seed another small change would be hard to tell from noise.
+- **Mixed personal/generalized comments remain ambiguous.** The prediction export now lets me examine the five seed-42 baseline `experience` errors. Two clearly describe personal outcomes, while three mix personal details with general claims or advice. My next step would be to review those mixed cases against a consistent boundary rule before further training.
+- **Why I stopped:** I completed the required improvement and the second measured stretch improvement. With only 38 test posts per seed, further tuning could adapt to these particular test sets. A new held-out set from different threads would provide stronger evidence.
 
 
 
@@ -572,3 +661,6 @@ I meant `experience` to be anything where the writer reports what happened to th
 ---
 
 📖 **How to run this project: [RUNNING.md](RUNNING.md)**
+
+
+**Additional AI disclosure:** I used ChatGPT to check the exported baseline predictions and three-epoch results, interpret the five-epoch metrics, and draft the stretch-feature analysis and corrections. ChatGPT identified patterns and possible label ambiguities in the misclassified comments. The five-epoch configuration and exact test-post matches were not independently verified during this review.
